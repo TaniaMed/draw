@@ -25,8 +25,6 @@ function resize() {
     draw.width = window.innerWidth;
     draw.height = window.innerHeight;
     ctx = draw.getContext('2d'); 
-    ctx.fillStyle = 'hsl(230, 100%, 50%)';
- 	ctx.lineWidth = 100;
     redrawScene();
 }
 resize();
@@ -86,13 +84,28 @@ draw.addEventListener("mouseup", (evt) => {
 draw.addEventListener("mouseleave", (evt) => {
     drawing = false;
 });
-
+let textColor;
 draw.addEventListener("mousemove", (evt) => {
     if (drawing) {
         const point = makePoint(evt.offsetX, evt.offsetY, weird);
         curves[curves.length - 1].push(point);
         needsRepaint = true;
     }
+    if (evt.shiftKey) {
+    	ctx.fillStyle = 'hsl(textColor, 100%, 50%)';
+    	if (textColor !== 0) {
+ 			ctx.fillStyle = 'hsl(textColor--, 100%, 50%)';
+ 		} else {
+ 			ctx.fillStyle = 'hsl(0, 100%, 50%)';
+ 		}
+ 		return;
+    }
+    if (textColor !== 359) {
+ 			ctx.fillStyle = 'hsl(textColor++, 100%, 50%)';
+ 	} else {
+ 			ctx.fillStyle = 'hsl(359, 100%, 50%)';
+ 	}
+ 	
 });
 
 let dateStart = new Date();
@@ -115,11 +128,30 @@ function repaint() {
         });
 }
 
+let decreases = true;
+function changeColor() {
+ 	if (ctx.lineWidth === 100) {
+ 		decreases = true;
+ 	} 
+ 	if (ctx.lineWidth === 0) {
+ 		decreases = false;
+ 	}
+ 	if (decreases) {
+ 		ctx.lineWidth--;
+ 	} else {
+ 		ctx.lineWidth++;
+ 	}
+ 	return;
+}
+
+ctx.lineWidth = 100;
+
 function tick() {
     if (needsRepaint) {
         repaint();
         needsRepaint = false;
     }
+    changeColor();
     window.requestAnimationFrame(tick);
 }
 
